@@ -19,15 +19,15 @@
 
 ## 状态一览
 
-| 状态 | 动画 |
-| --- | --- |
-| `idle` | 招手待机 |
-| `running` | 干饭（Agent 忙碌中） |
-| `completed` | 举碗庆祝 |
-| `aborted` | 歪头 |
-| `error` | 惊讶 |
+| 状态        | 动画                 |
+| ----------- | -------------------- |
+| `idle`      | 招手待机             |
+| `running`   | 干饭（Agent 忙碌中） |
+| `completed` | 举碗庆祝             |
+| `aborted`   | 歪头                 |
+| `error`     | 惊讶                 |
 
-角色是蓝色渐层发的鲸系女仆 Q 版像素形象；背景为日式春日夕阳 + 错落樱花树 + 飘落花瓣（循环 4 帧）。
+角色是 DeepSeek 鲸鱼娘：蓝色渐层发鲸系女仆 Q 版像素形象；背景为日式春日夕阳 + 错落樱花树 + 飘落花瓣（循环 4 帧）。
 
 ## 仓库结构
 
@@ -86,8 +86,8 @@ chmod +x supervisor/install-autostart.sh supervisor/uninstall-autostart.sh
 
 之后一般不用再管：
 
-- **Bridge** 始终监听 Cursor 状态  
-- **Daemon** 仅在 MiniToo 蓝牙已连接时启动；断开后会停掉  
+- **Bridge** 始终监听 Cursor 状态
+- **Daemon** 仅在 MiniToo 蓝牙已连接时启动；断开后会停掉
 - 日志：`~/.minitoo/supervisor.log`、`bridge.log`、`daemon.log`
 
 卸载：
@@ -119,10 +119,10 @@ chmod +x supervisor/install-autostart.sh supervisor/uninstall-autostart.sh
 
 ## 设计原则
 
-- **不影响 Agent**：Hook 只做轻量 JSON 解析与原子写文件  
-- **不碰隐私**：不落盘提示词、代码、对话正文  
-- **不常驻多余 AI/网络进程**：蓝牙只在 Daemon 里  
-- **设备可缺席**：Bridge 在 Daemon 未就绪时只重试报错，不崩溃  
+- **不影响 Agent**：Hook 只做轻量 JSON 解析与原子写文件
+- **不碰隐私**：不落盘提示词、代码、对话正文
+- **不常驻多余 AI/网络进程**：蓝牙只在 Daemon 里
+- **设备可缺席**：Bridge 在 Daemon 未就绪时只重试报错，不崩溃
 
 ## License / 致谢
 
@@ -132,4 +132,4 @@ chmod +x supervisor/install-autostart.sh supervisor/uninstall-autostart.sh
 
 ---
 
-*角色灵感有点像干饭的鲸——随便叫「Cursor 但 DeepSeek」也行，别当真。*
+_「Cursor 但 DeepSeek」233_
