@@ -1,13 +1,12 @@
-# Cursor但DeepSeek
+# MiniToo Cursor
 
-> 让 Cursor Agent 的工作状态，跑到 Divoom MiniToo 桌面音箱的像素屏上。  
-> 书桌上多了一个会招手、干饭、庆祝的「DeepSeek 味」桌宠——其实它听的是 Cursor。
+> 让 Cursor Agent 的工作状态，跑到 Divoom MiniToo 桌面音箱的像素屏上。
 
 ![idle preview](sprites/idle/loop.gif)
 
 ## 这是什么
 
-**Cursor但DeepSeek** 是一套本地、轻量的 Cursor Agent 状态可视化方案：
+**MiniToo Cursor** 是一套本地、轻量的 Cursor Agent 状态可视化方案：
 
 1. **Cursor Hooks** 把 Agent 生命周期写成 `~/.minitoo/cursor-state.json`（不读对话正文、不调 AI、不连网）
 2. **Bridge** 轮询该文件，按状态切换角色动画
@@ -133,4 +132,4 @@ chmod +x supervisor/install-autostart.sh supervisor/uninstall-autostart.sh
 
 ---
 
-*Cursor 在写代码，DeepSeek 在干饭。*
+*角色灵感有点像干饭的鲸——随便叫「Cursor 但 DeepSeek」也行，别当真。*
