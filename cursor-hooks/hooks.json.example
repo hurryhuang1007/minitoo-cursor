@@ -16,8 +16,7 @@
     "stop": [
       {
         "command": "/usr/bin/python3 ./hooks/minitoo-cursor-state.py",
-        "timeout": 3,
-        "loop_limit": 0
+        "timeout": 3
       }
     ],
     "sessionEnd": [
