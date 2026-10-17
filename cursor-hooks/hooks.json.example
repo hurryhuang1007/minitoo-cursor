@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "/usr/bin/python3 ./hooks/minitoo-cursor-state.py",
+        "timeout": 3
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "/usr/bin/python3 ./hooks/minitoo-cursor-state.py",
+        "timeout": 3
+      }
+    ],
+    "stop": [
+      {
+        "command": "/usr/bin/python3 ./hooks/minitoo-cursor-state.py",
+        "timeout": 3,
+        "loop_limit": 0
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "/usr/bin/python3 ./hooks/minitoo-cursor-state.py",
+        "timeout": 3
+      }
+    ]
+  }
+}

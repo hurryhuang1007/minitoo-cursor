@@ -1,0 +1,18 @@
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+
+# Generated capture/reconstruction artifacts
+captures/
+
+# Local Swift build outputs
+build/
+tools/divoom-daemon
+tools/divoom-rfcomm
+tools/divoom-rfcomm-send
+tools/divoom-menubar
+
+# Source/input images used during local testing
+assets/*
+omo-slim/

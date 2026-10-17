@@ -1,0 +1,22 @@
+# Python
+.venv/
+**/__pycache__/
+*.py[cod]
+.Python
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Logs / local runtime (live under ~/.minitoo, but just in case)
+*.log
+.captures/
+captures/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Nested upstream git metadata (vendored tree)
+divoom-minitoo-osx/.git/

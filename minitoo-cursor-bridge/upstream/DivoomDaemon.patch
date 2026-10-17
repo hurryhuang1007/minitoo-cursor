@@ -1,0 +1,41 @@
+diff --git a/tools/DivoomDaemon.swift b/tools/DivoomDaemon.swift
+--- a/tools/DivoomDaemon.swift
++++ b/tools/DivoomDaemon.swift
+@@ -90,11 +90,24 @@ final class DivoomDaemon {
+             throw NSError(domain: "DivoomDaemon", code: 1, userInfo: [NSLocalizedDescriptionKey: "Bluetooth device not found: \(address)"])
+         }
+         device = dev
++        if dev.isConnected() {
++            // macOS may keep the audio profile on the same link and refuse
++            // RFCOMM until that connection has been released. The user has
++            // explicitly approved this temporary audio disconnect.
++            let disconnectResult = dev.closeConnection()
++            print("released existing Bluetooth profile ret=0x\(String(disconnectResult, radix: 16))")
++            RunLoop.current.run(until: Date().addingTimeInterval(0.25))
++        }
+         var ch: IOBluetoothRFCOMMChannel?
+         print("opening \(dev.name ?? "?") \(dev.addressString ?? "?") rfcomm channel \(channelID)")
+         let ret = dev.openRFCOMMChannelSync(&ch, withChannelID: channelID, delegate: delegate)
+-        print("open ret=0x\(String(ret, radix: 16)) obj=\(ch != nil)")
+-        guard ret == kIOReturnSuccess, let channel = ch else {
++        RunLoop.current.run(until: Date().addingTimeInterval(0.4))
++        let channelIsOpen = ch?.isOpen() ?? false
++        print("open ret=0x\(String(ret, radix: 16)) obj=\(ch != nil) isOpen=\(channelIsOpen)")
++        // Some macOS versions return a non-zero IOReturn after providing a
++        // usable RFCOMM channel. Trust the channel state when it is open; a
++        // non-zero return without an open channel remains a hard failure.
++        guard let channel = ch, channelIsOpen else {
+             throw NSError(domain: "DivoomDaemon", code: Int(ret), userInfo: [NSLocalizedDescriptionKey: "RFCOMM open failed ret=0x\(String(ret, radix: 16)). If audio profile is connected, disconnect it once, then start daemon."])
+         }
+         rfcomm = channel
+@@ -177,5 +190,9 @@
+     func startServer() throws {
+         try openRFCOMM()
+         let params = NWParameters.tcp
+         params.allowLocalEndpointReuse = true
+-        listener = try NWListener(using: params, on: NWEndpoint.Port(rawValue: port)!)
++        params.requiredLocalEndpoint = .hostPort(
++            host: .ipv4(IPv4Address("127.0.0.1")!),
++            port: NWEndpoint.Port(rawValue: port)!
++        )
++        listener = try NWListener(using: params)
