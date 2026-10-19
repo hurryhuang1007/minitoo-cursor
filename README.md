@@ -1,7 +1,9 @@
 # MiniToo Cursor
 
 > 让 Cursor Agent 的工作状态，跑到 Divoom MiniToo 桌面音箱的像素屏上。
+
 > 使用其他 Agent，或者希望换成不同的交互形象？又或者不会安装/懒得操作？
+
 > 把本项目交给你的 AI Agent 即可——相信它能理解并妥善处理。
 
 ![idle preview](sprites/idle/loop.gif)
