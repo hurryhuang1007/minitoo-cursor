@@ -38,6 +38,9 @@ class BridgeStateTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 bridge.sprite_frame_paths(root, "idle")
 
+    def test_daemon_available_is_false_for_closed_port(self):
+        self.assertFalse(bridge.daemon_available("127.0.0.1", 1, timeout=0.05))
+
 
 if __name__ == "__main__":
     unittest.main()

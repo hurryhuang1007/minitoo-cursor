@@ -89,6 +89,15 @@ def display_fingerprint(status: str, label: str) -> str:
     return hashlib.sha256((status + "\0" + label).encode("ascii")).hexdigest()
 
 
+def daemon_available(host: str, port: int, timeout: float = 0.35) -> bool:
+    """True when the local RFCOMM daemon accepts TCP connections."""
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
 def sprite_frame_paths(sprites_dir: Path, status: str) -> List[Path]:
     folder = sprites_dir / status
     paths = [folder / "f{}-black.png".format(i) for i in range(1, 5)]
@@ -169,6 +178,8 @@ def main() -> int:
     parser.add_argument("--terminal-hold", type=float, default=12.0, help="seconds to show terminal status")
     parser.add_argument("--once", action="store_true", help="send exactly one state, then exit")
     parser.add_argument("--dry-run", action="store_true", help="build packets only; never contact the daemon")
+    parser.add_argument("--host", default="127.0.0.1", help="daemon host")
+    parser.add_argument("--port", type=int, default=40583, help="daemon TCP port")
     args = parser.parse_args()
 
     if args.interval <= 0 or args.stale_after <= 0 or args.terminal_hold < 0:
@@ -180,42 +191,73 @@ def main() -> int:
     sender = args.sender.expanduser()
     last_fingerprint: Optional[str] = None
     last_problem: Optional[str] = None
+    # Start false so the first time the daemon is up we always push (leaves boot screen).
+    daemon_was_up = False
 
     while True:
         try:
+            daemon_up = args.dry_run or daemon_available(args.host, args.port)
+            if daemon_up and not daemon_was_up:
+                # Fresh connect / daemon restart: MiniToo stays on the factory boot
+                # animation until we send something — force a push of current status.
+                last_fingerprint = None
+                print("bridge: daemon online; refreshing display", flush=True)
+            daemon_was_up = daemon_up
+
             state, error = read_state(state_path)
             if error:
                 if error != last_problem:
                     print("bridge: {}".format(error), file=sys.stderr)
                     last_problem = error
+                # No Hook state yet (or unreadable): still show idle once daemon is up
+                # so the device does not remain on the default power-on screen.
+                if not daemon_up:
+                    raise RuntimeError("daemon not available")
+                status, label = "idle", "IDLE"
             else:
                 assert state is not None
+                if not daemon_up:
+                    raise RuntimeError("daemon not available")
                 status, label = effective_status(
                     state, datetime.now().astimezone(), args.stale_after, args.terminal_hold
                 )
-                fingerprint = display_fingerprint(status, label)
-                if fingerprint != last_fingerprint:
-                    resp = send_status_animation(
-                        sender=sender,
-                        sprites_dir=sprites_dir,
-                        status=status,
-                        packet_dir=frame_dir / "packets",
-                        dry_run=args.dry_run,
-                    )
-                    if not resp.get("ok"):
-                        raise RuntimeError("daemon rejected send: {}".format(resp))
-                    print(
-                        "bridge: displayed {}{}".format(
-                            label, " (dry run)" if args.dry_run else ""
-                        )
-                    )
-                    last_fingerprint = fingerprint
+
+            fingerprint = display_fingerprint(status, label)
+            if fingerprint != last_fingerprint:
+                resp = send_status_animation(
+                    sender=sender,
+                    sprites_dir=sprites_dir,
+                    status=status,
+                    packet_dir=frame_dir / "packets",
+                    dry_run=args.dry_run,
+                    host=args.host,
+                    port=args.port,
+                )
+                if not resp.get("ok"):
+                    raise RuntimeError("daemon rejected send: {}".format(resp))
+                print(
+                    "bridge: displayed {}{}".format(
+                        label, " (dry run)" if args.dry_run else ""
+                    ),
+                    flush=True,
+                )
+                last_fingerprint = fingerprint
+            if error is None:
                 last_problem = None
         except (OSError, RuntimeError, socket.error) as exc:
             message = "bridge: {}".format(exc)
             if message != last_problem:
                 print(message, file=sys.stderr)
                 last_problem = message
+            # Treat send/connect failures as daemon down so the next successful
+            # bring-up refreshes the screen again.
+            if not args.dry_run and (
+                "daemon not available" in message
+                or "Connection refused" in message
+                or "rejected send" in message
+            ):
+                daemon_was_up = False
+                last_fingerprint = None
 
         if args.once:
             return 0 if last_problem is None else 1
