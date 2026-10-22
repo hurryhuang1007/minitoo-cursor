@@ -78,7 +78,10 @@ def effective_status(
 ) -> Tuple[str, str]:
     """Map one Hook state to a display state without rewriting the state file."""
     age = max(0.0, (now - state.updated_at).total_seconds())
-    if state.status == "running" and age >= stale_after:
+    # Hooks write `running` once at submit and do not heartbeat. A long task
+    # must stay running until `stop` / `sessionEnd`. stale_after <= 0 disables
+    # the optional safety timeout.
+    if stale_after > 0 and state.status == "running" and age >= stale_after:
         return "idle", "STALE"
     if state.status in {"completed", "aborted", "error"} and age >= terminal_hold:
         return "idle", "IDLE"
@@ -174,7 +177,12 @@ def main() -> int:
     parser.add_argument("--state-path", type=Path, default=DEFAULT_STATE_PATH)
     parser.add_argument("--frame-dir", type=Path, default=DEFAULT_FRAME_DIR)
     parser.add_argument("--interval", type=float, default=0.75, help="poll interval in seconds")
-    parser.add_argument("--stale-after", type=float, default=300.0, help="running age treated as stale")
+    parser.add_argument(
+        "--stale-after",
+        type=float,
+        default=0.0,
+        help="seconds before an unchanged running state is shown as idle; 0 keeps running until stop",
+    )
     parser.add_argument("--terminal-hold", type=float, default=12.0, help="seconds to show terminal status")
     parser.add_argument("--once", action="store_true", help="send exactly one state, then exit")
     parser.add_argument("--dry-run", action="store_true", help="build packets only; never contact the daemon")
@@ -182,8 +190,8 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=40583, help="daemon TCP port")
     args = parser.parse_args()
 
-    if args.interval <= 0 or args.stale_after <= 0 or args.terminal_hold < 0:
-        parser.error("interval and stale-after must be positive; terminal-hold cannot be negative")
+    if args.interval <= 0 or args.stale_after < 0 or args.terminal_hold < 0:
+        parser.error("interval must be positive; stale-after and terminal-hold cannot be negative")
 
     state_path = args.state_path.expanduser()
     frame_dir = args.frame_dir.expanduser()

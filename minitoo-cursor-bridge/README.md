@@ -13,7 +13,7 @@
 | `completed` | `sprites/completed` | 举碗庆祝（约 12 秒后回 idle） |
 | `aborted` | `sprites/aborted` | 歪头 |
 | `error` | `sprites/error` | 惊讶 |
-| 过期 `running` | 显示为 idle | `STALE` |
+| 长时间 `running` | 一直干饭，直到 `stop` | 默认不按时间回退；`--stale-after` 秒数 > 0 时才会显示 `STALE` |
 
 ## 推荐：开机自启（不用手管）
 

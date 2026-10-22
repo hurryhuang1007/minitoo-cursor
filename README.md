@@ -88,7 +88,7 @@ chmod +x supervisor/install-autostart.sh supervisor/uninstall-autostart.sh
 
 之后一般不用再管：
 
-- **Bridge** 始终监听 Cursor 状态；Daemon 刚就绪时会强制推送当前画面（默认 idle），避免设备停在开机屏
+- **Bridge** 始终监听 Cursor 状态；Daemon 刚就绪时会强制推送当前画面（默认 idle），避免设备停在开机屏。`running` 会一直保持到任务结束，不会因为耗时过长自动回待机
 - **Daemon** 仅在 MiniToo 蓝牙已连接时启动；断开后会停掉
 - 日志：`~/.minitoo/supervisor.log`、`bridge.log`、`daemon.log`
 

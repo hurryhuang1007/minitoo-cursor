@@ -26,6 +26,11 @@ class BridgeStateTests(unittest.TestCase):
         state = bridge.CursorState("running", "beforeSubmitPrompt", now - timedelta(seconds=301))
         self.assertEqual(bridge.effective_status(state, now, 300, 12), ("idle", "STALE"))
 
+    def test_long_running_stays_running_when_stale_timeout_disabled(self):
+        now = datetime(2026, 10, 18, tzinfo=timezone.utc)
+        state = bridge.CursorState("running", "beforeSubmitPrompt", now - timedelta(hours=2))
+        self.assertEqual(bridge.effective_status(state, now, 0, 12), ("running", "RUNNING"))
+
     def test_terminal_state_expires_to_idle(self):
         now = datetime(2026, 10, 18, tzinfo=timezone.utc)
         state = bridge.CursorState("completed", "stop", now - timedelta(seconds=13))
